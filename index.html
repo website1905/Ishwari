@@ -200,14 +200,15 @@
 </head>
 <body class="text-gray-800">
 
-    <!-- Copied exact audio mechanism from the working file -->
-    <audio id="bgmusic" loop preload="auto"><source src="bgmusic.mp3" type="audio/mpeg"></audio>
-    <audio id="song1" loop preload="auto"><source src="song1.mp3" type="audio/mpeg"></audio>
+    <!-- Audio exactly mapped from the working code, added playsinline for iOS -->
+    <audio id="bgmusic" loop preload="auto" playsinline><source src="bgmusic.mp3" type="audio/mpeg"></audio>
+    <audio id="song1" loop preload="auto" playsinline><source src="song1.mp3" type="audio/mpeg"></audio>
 
     <div id="stage-1" class="main-card p-8 flex flex-col items-center justify-center min-h-[400px]">
         <h1 class="text-4xl font-bold mb-4 text-center">Sweet October 🌸</h1>
         <p class="text-lg text-center mb-8">Ready to unlock a surprise,<br>Ishwari Ji? 💖</p>
-        <button onclick="startGame()" class="btn-pink font-semibold py-3 px-8 text-lg">
+        <!-- Button mapping directly to startGame -->
+        <button id="start-btn" onclick="startGame()" class="btn-pink font-semibold py-3 px-8 text-lg">
             Start Game 🎮✨
         </button>
     </div>
@@ -323,6 +324,16 @@
     </div>
 
     <script>
+        // Adding an extra invisible touch layer for stubborn mobile browsers
+        let audioUnlocked = false;
+        document.body.addEventListener('touchstart', function() {
+            if(!audioUnlocked) {
+                document.getElementById('bgmusic').load();
+                document.getElementById('song1').load();
+                audioUnlocked = true;
+            }
+        }, { once: true, passive: true });
+
         let memoryCards = [];
         let flippedCards = [];
         let matchedPairs = 0;
@@ -334,7 +345,7 @@
         const totalSlides = 20;
 
         function startGame() {
-            // Copied exact play mechanism
+            // Using the exact logic from your working script
             document.getElementById('bgmusic').play().catch(e => console.log("Audio play failed:", e));
             
             document.getElementById('stage-1').classList.add('hidden');
@@ -343,7 +354,7 @@
         }
 
         function changeSong() {
-            // Copied exact song switch mechanism
+            // Using the exact logic from your working script
             let bgm = document.getElementById('bgmusic');
             let s1 = document.getElementById('song1');
             bgm.pause();
