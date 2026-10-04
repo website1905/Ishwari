@@ -200,7 +200,8 @@
 </head>
 <body class="text-gray-800">
 
-    <audio id="bg-audio" src="bgmusic.mp3" loop preload="auto"></audio>
+    <!-- Removed src and preload from here to force loading inside the click event -->
+    <audio id="bg-audio" loop></audio>
 
     <div id="stage-1" class="main-card p-8 flex flex-col items-center justify-center min-h-[400px]">
         <h1 class="text-4xl font-bold mb-4 text-center">Sweet October 🌸</h1>
@@ -333,8 +334,16 @@
         const totalSlides = 20;
 
         function startGame() {
-            // Audio should already be preloaded, just play it
-            bgAudio.play().catch(e => console.log("Audio play failed, user interaction needed.", e));
+            // Force the audio to load and play strictly inside this click event
+            bgAudio.src = 'bgmusic.mp3';
+            bgAudio.volume = 1.0;
+            bgAudio.load();
+            
+            let playPromise = bgAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(e => console.log("Audio play failed, check browser settings:", e));
+            }
+            
             document.getElementById('stage-1').classList.add('hidden');
             document.getElementById('stage-2').classList.remove('hidden');
             initMemoryGame();
@@ -343,7 +352,10 @@
         function changeSong() {
             bgAudio.src = 'song1.mp3';
             bgAudio.load();
-            bgAudio.play().catch(e => console.log("Audio play failed.", e));
+            let playPromise = bgAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(e => console.log("Audio play failed.", e));
+            }
             const vinyl = document.getElementById('vinyl-record');
             vinyl.classList.add('spin');
         }
@@ -683,3 +695,4 @@ Always there for you💖`;
     </script>
 </body>
 </html>
+
