@@ -200,8 +200,10 @@
 </head>
 <body class="text-gray-800">
 
-    <!-- Removed src and preload from here to force loading inside the click event -->
-    <audio id="bg-audio" loop></audio>
+    <!-- Explicitly defining source and type helps browsers allow the media -->
+    <audio id="bg-audio" preload="auto" loop>
+        <source src="bgmusic.mp3" type="audio/mpeg">
+    </audio>
 
     <div id="stage-1" class="main-card p-8 flex flex-col items-center justify-center min-h-[400px]">
         <h1 class="text-4xl font-bold mb-4 text-center">Sweet October 🌸</h1>
@@ -333,15 +335,24 @@
         let slideInterval;
         const totalSlides = 20;
 
+        function forcePlayAudio() {
+            bgAudio.play().catch(e => console.log("Still blocked:", e));
+            // Remove listeners once it successfully starts
+            document.removeEventListener('click', forcePlayAudio);
+            document.removeEventListener('touchstart', forcePlayAudio);
+        }
+
         function startGame() {
-            // Force the audio to load and play strictly inside this click event
-            bgAudio.src = 'bgmusic.mp3';
-            bgAudio.volume = 1.0;
-            bgAudio.load();
-            
+            // Attempt to play audio
             let playPromise = bgAudio.play();
+            
             if (playPromise !== undefined) {
-                playPromise.catch(e => console.log("Audio play failed, check browser settings:", e));
+                playPromise.catch(e => {
+                    console.log("Audio auto-play prevented, attaching fallback interaction listeners.", e);
+                    // Fallback: If blocked, wait for the very next time the user touches the screen (like tapping a memory card)
+                    document.addEventListener('click', forcePlayAudio, { once: true });
+                    document.addEventListener('touchstart', forcePlayAudio, { once: true });
+                });
             }
             
             document.getElementById('stage-1').classList.add('hidden');
@@ -352,10 +363,8 @@
         function changeSong() {
             bgAudio.src = 'song1.mp3';
             bgAudio.load();
-            let playPromise = bgAudio.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(e => console.log("Audio play failed.", e));
-            }
+            bgAudio.play().catch(e => console.log("Audio play failed.", e));
+            
             const vinyl = document.getElementById('vinyl-record');
             vinyl.classList.add('spin');
         }
@@ -695,4 +704,3 @@ Always there for you💖`;
     </script>
 </body>
 </html>
-
