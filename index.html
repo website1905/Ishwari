@@ -200,10 +200,9 @@
 </head>
 <body class="text-gray-800">
 
-    <!-- Explicitly defining source and type helps browsers allow the media -->
-    <audio id="bg-audio" preload="auto" loop>
-        <source src="bgmusic.mp3" type="audio/mpeg">
-    </audio>
+    <!-- Copied exact audio mechanism from the working file -->
+    <audio id="bgmusic" loop preload="auto"><source src="bgmusic.mp3" type="audio/mpeg"></audio>
+    <audio id="song1" loop preload="auto"><source src="song1.mp3" type="audio/mpeg"></audio>
 
     <div id="stage-1" class="main-card p-8 flex flex-col items-center justify-center min-h-[400px]">
         <h1 class="text-4xl font-bold mb-4 text-center">Sweet October 🌸</h1>
@@ -324,7 +323,6 @@
     </div>
 
     <script>
-        const bgAudio = document.getElementById('bg-audio');
         let memoryCards = [];
         let flippedCards = [];
         let matchedPairs = 0;
@@ -335,25 +333,9 @@
         let slideInterval;
         const totalSlides = 20;
 
-        function forcePlayAudio() {
-            bgAudio.play().catch(e => console.log("Still blocked:", e));
-            // Remove listeners once it successfully starts
-            document.removeEventListener('click', forcePlayAudio);
-            document.removeEventListener('touchstart', forcePlayAudio);
-        }
-
         function startGame() {
-            // Attempt to play audio
-            let playPromise = bgAudio.play();
-            
-            if (playPromise !== undefined) {
-                playPromise.catch(e => {
-                    console.log("Audio auto-play prevented, attaching fallback interaction listeners.", e);
-                    // Fallback: If blocked, wait for the very next time the user touches the screen (like tapping a memory card)
-                    document.addEventListener('click', forcePlayAudio, { once: true });
-                    document.addEventListener('touchstart', forcePlayAudio, { once: true });
-                });
-            }
+            // Copied exact play mechanism
+            document.getElementById('bgmusic').play().catch(e => console.log("Audio play failed:", e));
             
             document.getElementById('stage-1').classList.add('hidden');
             document.getElementById('stage-2').classList.remove('hidden');
@@ -361,9 +343,11 @@
         }
 
         function changeSong() {
-            bgAudio.src = 'song1.mp3';
-            bgAudio.load();
-            bgAudio.play().catch(e => console.log("Audio play failed.", e));
+            // Copied exact song switch mechanism
+            let bgm = document.getElementById('bgmusic');
+            let s1 = document.getElementById('song1');
+            bgm.pause();
+            s1.play().catch(e => console.log("Audio play failed:", e));
             
             const vinyl = document.getElementById('vinyl-record');
             vinyl.classList.add('spin');
@@ -374,7 +358,6 @@
             board.innerHTML = '';
             matchedPairs = 0;
             
-            // Exactly matching the GitHub file names
             let cardImages = [
                 'card 1.png', 'card 1.png',
                 'card 2.jpg', 'card 2.jpg',
@@ -390,7 +373,6 @@
                 card.dataset.image = imgSrc;
                 card.dataset.index = index;
                 
-                // Construct inner elements
                 card.innerHTML = `
                     <div class="memory-card-inner">
                         <div class="memory-card-front">🌸</div>
@@ -436,7 +418,7 @@
 
         function populateGallery() {
             const track = document.getElementById('carousel-track');
-            if (track.children.length > 0) return; // Already populated
+            if (track.children.length > 0) return; 
             
             for (let i = 1; i <= totalSlides; i++) {
                 const slide = document.createElement('div');
@@ -444,7 +426,6 @@
                 
                 const img = document.createElement('img');
                 
-                // Logic to handle 3.png explicitly based on your repo files
                 let ext = (i === 3) ? 'png' : 'jpg';
                 img.src = `${i}.${ext}`;
                 
@@ -485,7 +466,7 @@
         
         function startCarousel() {
             if (slideInterval) clearInterval(slideInterval);
-            slideInterval = setInterval(nextSlide, 3000); // Change slide every 3 seconds
+            slideInterval = setInterval(nextSlide, 3000); 
         }
         
         function stopCarousel() {
@@ -591,7 +572,7 @@ Always there for you💖`;
 
         function initScratchCard() {
             const canvas = document.getElementById('scratch-canvas');
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
             let isDrawing = false;
             let revealed = false;
 
@@ -632,7 +613,7 @@ Always there for you💖`;
                 e.preventDefault();
                 const { x, y } = getCoordinates(e);
                 ctx.beginPath();
-                ctx.arc(x, y, 25, 0, Math.PI * 2);
+                ctx.arc(x, y, 30, 0, Math.PI * 2);
                 ctx.fill();
                 checkScratchPercent();
             }
@@ -662,12 +643,13 @@ Always there for you💖`;
                 
                 if (percent > 40 && !revealed) {
                     revealed = true;
-                    canvas.classList.add('opacity-0'); 
+                    canvas.style.transition = 'opacity 0.8s ease';
+                    canvas.style.opacity = '0';
                     setTimeout(() => {
                         canvas.style.display = 'none';
                         fireConfetti();
                         document.getElementById('close-scratch').classList.remove('hidden');
-                    }, 500);
+                    }, 800);
                 }
             }
         }
